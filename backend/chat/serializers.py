@@ -1,20 +1,20 @@
 from rest_framework import serializers
-from .models import ChatMessage, ChatRoom
-from collections import OrderedDict
+from .models import Chat, Message
 
 
 
-class MessageSerializer(serializers.ModelSerializer):
-    
-    def to_representation(self, instance):
-        result = super(MessageSerializer, self).to_representation(instance)
-        return super([(key, result[key])]).to_representation(instance)
-    
+class ChatSerializer(serializers.ModelSerializer):
+    participants = serializers.SerializerMethodField()
     class Meta:
-        model = ChatMessage
-        fields = ['__str__', 'message', 'timestamp']
+        model = Chat
+        fields = ['id', 'participants']
+        extra_kwargs = {"participants": {"read_only": True}}
 
-class ChatRoomSerializer(serializers.ModelSerializer):
+    def get_participants(self, obj):
+        return [participant.username for participant in obj.participants.all()]
+    
+
+class MessageSeriazer(serializers.ModelSerializer):
     class Meta:
-        model = ChatRoom
-        fields = ['name']
+        model = Message
+        fields = ['id','chat', 'sender', 'content']

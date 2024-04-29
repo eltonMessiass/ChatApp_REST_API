@@ -1,11 +1,7 @@
-from  django.urls import path
-from . import views
-
-
-
-
+from django.urls import path
+from .views import chat_list, chat_detail
 
 urlpatterns = [
-    path('lobby/', views.LobbyView.as_view(), name='lobby'),
-    path('room/', views.RoomView.as_view(), name="room")
+    path('list/', chat_list, name='chat-list'),
+    path('list/<int:pk>/', chat_detail, name='chat_detail'),
 ]
