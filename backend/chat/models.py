@@ -6,27 +6,19 @@ from django.core.exceptions import ValidationError
 
 
 class Chat(models.Model):
-    participants=models.ManyToManyField(User)
+    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats_as_user1', default=1)
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chats_as_user2', default=1)
     date_time=models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        participants = self.participants.all()
-        # return f"{participants[0]} - {participants[1]}"
-        if participants.count() >= 2:
-            return f"{participants[0]} - {participants[1]}"
-        # Se houver apenas um participante
-        elif participants.count() == 1:
-            return f"{participants[0]} - "
-        # Se não houver participantes
-        else:
-            return "Sem participantes"
+            return f"{self.user1} - {self.user2}"
     
-    # def save(self, *args, **kwargs):
-    #     if self.pk is None:
-    #         existing_chat = Chat.objects.filter(participants__in=self.participants.all()).distinct()
-    #         if existing_chat.exists() and existing_chat.count() == len(self.participants.all()):
-    #             raise ValidationError("Já existe um chat")
-    #     super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            existing_chat = Chat.objects.filter(user1=self.user1, user2=self.user2)
+            if existing_chat.exists():
+                raise ValidationError("Já existe um chat")
+        super().save(*args, **kwargs)
 
         
 
