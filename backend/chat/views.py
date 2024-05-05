@@ -64,7 +64,7 @@ def chat_detail(request, pk):
 @api_view(['GET'])
 def message_list(request):
     messages = Message.objects.all()
-    serializer = MessageSeriazer(messages, many=True)
+    serializer = MessageSerializer(messages, many=True)
 
     return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
 
@@ -74,3 +74,37 @@ def same_chat_messages(request, pk):
     serializer = MessageSerializer(messages, many=True)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+# @api_view(['POST'])
+# def send_message(request):
+
+#     # if request.method == 'POST':
+#     #     serializer = MessageSerializer(data=request.data)
+#     #     if serializer.is_valid():
+#     #         serializer.save()
+
+#     #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    
+@api_view(['POST'])
+def send_message(request, pk):
+    try:
+        if request.method == 'POST':
+            request.data['chat'] = pk
+            serializer = MessageSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def delete_message(request, pk):
+    if request.method == 'DELETE':
+        try:
+            message = Message.objects.get(pk=pk)
+            message.delete()
+            return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_204_NO_CONTENT)
