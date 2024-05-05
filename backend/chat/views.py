@@ -1,20 +1,19 @@
-from django.urls import reverse
 from rest_framework.decorators import api_view
-from .serializers import ChatSerializer
+from .serializers import ChatSerializer, MessageSerializer
 from rest_framework.response import Response
-from .models import Chat
+from .models import Chat, Message
 from rest_framework import status
-from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 
 
 
-@api_view(['GET', 'POST'])
+
+@api_view(['GET'])
 def chat_list(request):
     if request.method == 'GET':
         chats = Chat.objects.all()
-        serializer = ChatSerializer(chats, many=True)
+        serializer = ChatSerializer(chats, many=True, context={'request': request})
         return Response(serializer.data)
         
 @api_view(['POST'])
@@ -46,6 +45,11 @@ def chat_detail(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
                    
     if request.method == 'GET':
+        
+        if request.user == chat.user1:
+            other_participant = chat.user2
+        else:
+            other_participant = chat.user1
         serializer = ChatSerializer(chat)
         return Response(serializer.data)
     
@@ -55,3 +59,18 @@ def chat_detail(request, pk):
             return Response(status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_204_NO_CONTENT)
+        
+
+@api_view(['GET'])
+def message_list(request):
+    messages = Message.objects.all()
+    serializer = MessageSeriazer(messages, many=True)
+
+    return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def same_chat_messages(request, pk):
+    messages = Message.objects.filter(chat__id=pk)
+    serializer = MessageSerializer(messages, many=True)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)

@@ -4,17 +4,22 @@ from .models import Chat, Message
 
 
 class ChatSerializer(serializers.ModelSerializer):
-    participants = serializers.SerializerMethodField()
+    other_participant = serializers.SerializerMethodField()
     class Meta:
         model = Chat
-        fields = ['id', 'participants']
-        extra_kwargs = {"participants": {"read_only": True}}
+        fields = ['id', 'user1', 'user2', 'other_participant']
+        # extra_kwargs = {"participants": {"read_only": True}}
 
-    def get_participants(self, obj):
-        return [participant.username for participant in obj.participants.all()]
+    def get_other_participant(self, obj):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            if obj.user1 == request.user:
+                return obj.user2.username
+            return obj.user1.username
+        
     
 
-class MessageSeriazer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['id','chat', 'sender', 'content']
+        fields = ['id','chat', 'message_sender', 'content']

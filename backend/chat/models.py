@@ -24,14 +24,21 @@ class Chat(models.Model):
 
 
 class Message(models.Model):
-    chat = models.ForeignKey(Chat,on_delete=models.CASCADE, null=False)
-    message_sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    chat = models.ForeignKey(Chat,on_delete=models.CASCADE, related_name="message_sender", null=False)
+    message_sender = models.ForeignKey(User,related_name="message_sender",  on_delete=models.CASCADE, default=1)
+    message_receiver = models.ForeignKey(User, related_name="message_receiver", on_delete=models.CASCADE, default=1)
     content = models.TextField(null=True)
 
+    def __str__(self):
+         return str(self.chat.pk)
 
 
 
-@receiver(pre_save, sender=Message)
-def get_sender(sender, instance, **kwargs):
-    if not instance.message_sender:
-        instance.message_sender = instance.message_sender
+
+
+
+
+# @receiver(pre_save, sender=Message)
+# def get_sender(sender, instance, **kwargs):
+#     if not instance.message_sender:
+#         instance.message_sender = instance.message_sender
