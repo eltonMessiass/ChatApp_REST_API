@@ -5,7 +5,7 @@ from .models import Chat, Message
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -13,6 +13,13 @@ from django.contrib.auth.models import User
 def chat_list(request):
     if request.method == 'GET':
         chats = Chat.objects.all()
+        serializer = ChatSerializer(chats, many=True, context={'request': request})
+        return Response(serializer.data)
+
+@api_view(['GET'])
+def loged_user_chats(request):
+    if request.method == 'GET':
+        chats = Chat.objects.filter(user1=request.user) | Chat.objects.filter(user2=request.user)
         serializer = ChatSerializer(chats, many=True, context={'request': request})
         return Response(serializer.data)
         
